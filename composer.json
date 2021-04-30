@@ -25,7 +25,7 @@
         "laravel/tinker": "^1.0",
         "maatwebsite/excel": "^3.1",
         "mopo922/laravel-treats": "^2.0",
-        "pacuna/schemas": "dev-master",
+        "pacuna/schemas": "@dev-master",
         "pcinaglia/laraupdater": "^1.0",
         "ramsey/uuid": "^3.8",
         "santigarcor/laratrust": "5.2.*",
@@ -47,6 +47,8 @@
         "preferred-install": "dist",
         "sort-packages": true
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "extra": {
         "laravel": {
             "dont-discover": []
