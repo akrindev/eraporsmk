@@ -34,7 +34,7 @@ use App\Kewirausahaan;
 use App\Anggota_kewirausahaan;
 use App\Exports\LaporanExport;
 use App\Imports\LaporanImport;
-use App\Rombel4_tahun;
+use App\Rombel4_Tahun;
 use Validator;
 class LaporanController extends Controller
 {
@@ -47,14 +47,21 @@ class LaporanController extends Controller
 		if($user->hasRole('waka')){
 			return view('laporan.waka.catatan_akademik');
 		} else {
-			$get_siswa = Anggota_rombel::with('siswa')->with('catatan_wali')->with(['nilai_rapor' => function($query){
-				$query->with('pembelajaran');
-				$query->limit(3);
-			}])->whereHas('rombongan_belajar', function($query) use ($user){
+			$get_siswa = Anggota_rombel::whereHas('rombongan_belajar', function($query) use ($user){
 				$query->where('guru_id', $user->guru_id);
 				$query->where('jenis_rombel', 1);
 				$query->where('semester_id', session('semester_id'));
-			})->order()->get();
+			})->with('siswa')->with('catatan_wali')->with(['nilai_rapor' => function($query) use ($user){
+				$query->whereHas('pembelajaran', function($query) use ($user){
+					$query->whereHas('rombongan_belajar', function($query) use ($user){
+						$query->where('guru_id', $user->guru_id);
+						$query->where('jenis_rombel', 1);
+						$query->where('semester_id', session('semester_id'));
+					});
+				});
+				$query->with(['pembelajaran.rombongan_belajar.wali']);
+				$query->limit(3);
+			}])->order()->get();
 			$params = array(
 				'get_siswa'	=> $get_siswa,
 			);
@@ -472,7 +479,7 @@ class LaporanController extends Controller
 				$query->where('semester_id', session('semester_id'));
 			})->order()->get();
 			//$rombel_4_tahun = (config('global.rombel_4_tahun')) ? unserialize(config('global.rombel_4_tahun')) : [];
-			$rombel_4_tahun = Rombel4_tahun::select('rombongan_belajar_id')->where('sekolah_id', session('sekolah_id'))->where('semester_id', session('semester_id'))->get()->keyBy('rombongan_belajar_id')->keys()->toArray();
+			$rombel_4_tahun = Rombel4_Tahun::select('rombongan_belajar_id')->where('sekolah_id', session('sekolah_id'))->where('semester_id', session('semester_id'))->get()->keyBy('rombongan_belajar_id')->keys()->toArray();
 			$params = array(
 				'get_siswa'	=> $get_siswa,
 				'cari_tingkat_akhir'	=> $cari_tingkat_akhir,
